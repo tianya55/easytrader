@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request
 
 from . import api
 from .log import logger
+from easytrader import grid_strategies
 
 app = Flask(__name__)
 
@@ -23,6 +24,19 @@ def error_handle(func):
 
     return wrapper
 
+
+@app.route("/connect", methods=["GET"])
+@error_handle
+def post_prepare():
+    try:
+        user = api.use("ths")
+        user.connect(r"c:\cczq\xiadan.exe")
+        user.grid_strategy = grid_strategies.Xls
+        global_store["user"] = user
+        return jsonify({"msg": "login success"}), 201
+    except Exception as e:
+        return jsonify({"error": e}), 400
+        
 
 @app.route("/prepare", methods=["POST"])
 @error_handle
