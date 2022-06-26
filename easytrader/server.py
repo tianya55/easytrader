@@ -5,6 +5,10 @@ from flask import Flask, jsonify, request
 from . import api
 from .log import logger
 
+from easytrader import grid_strategies
+
+
+
 app = Flask(__name__)
 
 global_store = {}
@@ -23,6 +27,19 @@ def error_handle(func):
 
     return wrapper
 
+#取消登录过程、手动准备好环境
+@app.route("/connect", methods=["GET"])
+@error_handle
+def post_connect():
+    try:
+        user = api.use('ths')
+        user.connect(r"c:\cczq\weituo.exe")
+        #默认修改为xls读取模式
+        user.grid_strategy = grid_strategies.Xls
+        global_store["user"] = user
+        return jsonify({"msg": "login success"}), 201
+    except Exception as e:
+        return jsonify({"error": e}), 400
 
 @app.route("/prepare", methods=["POST"])
 @error_handle
